@@ -1,5 +1,8 @@
-.PHONY: test
+.PHONY: test install train
 
+install:
+	pip install -r requirements.txt
+	python setup.py develop
 
 train: data/train.txt
 	python ./src/model_conditional.py
