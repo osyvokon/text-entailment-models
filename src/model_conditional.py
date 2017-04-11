@@ -88,6 +88,10 @@ class ConditionalEncodingModel:
                 where `label` is a string, one of 'neutral', 'entailment',
                 'contradiction', `premise` and `hypothesis` are tokenized
                 premise sentences (each is a list of string tokens).
+
+        Returns:
+            keras.history object
+
         """
 
         # Prepare data
@@ -95,7 +99,6 @@ class ConditionalEncodingModel:
         Y = to_categorical([labels[y] for y, *_ in data])
         premise = [self.vectorize(p) for _, p, h in data]
         hyp = [self.vectorize(h) for _, p, h in data]
-
         premise = pad_sequences(premise, maxlen=self.premise_maxlen, value=0, padding='pre')
         hyp = pad_sequences(hyp, maxlen=self.hyp_maxlen, value=0, padding='post')
 
@@ -112,6 +115,26 @@ class ConditionalEncodingModel:
                             validation_split=0.25,
                             epochs=3)
         return history
+
+    def predict(self, data):
+        """Make predictions on the unseen data.
+
+        Args:
+            data: list of (premise, hypothesis) tuples
+
+        Returns:
+            list of string labels ('neutral', 'contradiction', or 'entailment')
+        """
+
+        premise = [self.vectorize(p) for p, h in data]
+        hyp = [self.vectorize(h) for p, h in data]
+        premise = pad_sequences(premise, maxlen=self.premise_maxlen, value=0, padding='pre')
+        hyp = pad_sequences(hyp, maxlen=self.hyp_maxlen, value=0, padding='post')
+
+        predictions = self.model.predict([premise, hyp])
+        labels = ['neutral', 'contradiction', 'entailment']
+        result = [labels[i] for i in predictions.argmax(axis=1)]
+        return result
 
     def save(self, path):
         model.save(path)
@@ -167,24 +190,35 @@ class ConditionalEncodingModel:
 
 class Test_ConditionalEncodingModel:
 
-    def test_vectorize(self, word2vec):
-        word2vec.index2word = ['<unk>', 'I', 'go', 'to', 'school']
-        model = ConditionalEncodingModel(word2vec)
+    def test_vectorize(self, model):
         sentence = 'I go to fancy school'.split()
         expected = [1, 2, 3, 0,   4]
         assert model.vectorize(sentence).tolist() == expected
 
-    def test_fit(self, word2vec, rng):
+    def test_fit(self, model, dataset):
+        history = model.fit(dataset)
+        assert history.history['loss'][0] > history.history['loss'][-1]
+
+    def test_predict(self, model, dataset):
+        model.fit(dataset)
+
+        data = [["I go to school".split(), "School exists".split()]]
+        predictions = model.predict(data)
+        assert predictions == ['entailment']
+
+    @pytest.fixture
+    def model(self, word2vec, rng):
         vocab = ['<unk>', 'I', 'go', 'to', 'school']
         word2vec.index2word = vocab
         word2vec.syn0 = rng.randn(len(vocab), 300)
-        data = [
+        return ConditionalEncodingModel(word2vec)
+
+    @pytest.fixture
+    def dataset(self):
+        return [
             ["entailment", "I go to school".split(), "There is a school".split()],
             ["neutral", "I went to school".split(), "School is good".split()],
         ]
-        model = ConditionalEncodingModel(word2vec)
-        history = model.fit(data)
-        assert history.history['loss'][0] > history.history['loss'][-1]
 
     @pytest.fixture
     def word2vec(self):
