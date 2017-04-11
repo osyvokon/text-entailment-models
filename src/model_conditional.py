@@ -125,16 +125,16 @@ class ConditionalEncodingModel:
 
         model = self.model
         early_stopping = EarlyStopping(monitor='val_loss', patience=4)
-        checkpoint = ModelCheckpoint('model.check', save_best_only=True)
+        checkpoint = ModelCheckpoint('/tmp/model.check', save_best_only=True)
         reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                       patience=2, min_lr=0.0001)
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy',
-                      metrics=['accuracy'],
-                      callbacks=[reduce_lr, early_stopping, checkpoint])
+                      metrics=['accuracy'])
         history = model.fit([premise, hyp], Y,
                             validation_split=0.25,
-                            epochs=epochs)
+                            epochs=epochs,
+                            callbacks=[reduce_lr, early_stopping, checkpoint])
         return history
 
     def predict(self, data):
