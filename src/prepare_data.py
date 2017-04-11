@@ -37,7 +37,9 @@ def convert_file(path):
 
     with open(path) as f:
         for line in f:
-            yield convert_line(line)
+            converted = convert_line(line)
+            if converted:
+                yield converted
 
 
 def convert_line(line):
@@ -47,8 +49,10 @@ def convert_line(line):
     s1 = ' '.join(tokenize(line['sentence1']))
     s2 = ' '.join(tokenize(line['sentence2']))
     label = line['gold_label']
-
-    return '\t'.join([label, s1, s2])
+    if label in {'neutral', 'contradiction', 'entailment'}:
+        return '\t'.join([label, s1, s2])
+    else:
+        return None
 
 
 def tokenize(s):
@@ -70,6 +74,11 @@ def test_convert_line():
         'two women are embracing while holding to go packages\t'
         'the sisters are hugging goodbye while holding to go packages after just eating lunch')
     assert convert_line(line) == expected
+
+
+def test_convert_line_bad():
+    line = """{"annotator_labels": ["neutral", "entailment", "neutral", "neutral", "neutral"], "captionID": "4705552913.jpg#2", "gold_label": "-", "pairID": "4705552913.jpg#2r1n", "sentence1": "Two women are embracing while holding to go packages.", "sentence1_binary_parse": "( ( Two women ) ( ( are ( embracing ( while ( holding ( to ( go packages ) ) ) ) ) ) . ) )", "sentence1_parse": "(ROOT (S (NP (CD Two) (NNS women)) (VP (VBP are) (VP (VBG embracing) (SBAR (IN while) (S (NP (VBG holding)) (VP (TO to) (VP (VB go) (NP (NNS packages)))))))) (. .)))", "sentence2": "The sisters are hugging goodbye while holding to go packages after just eating lunch.", "sentence2_binary_parse": "( ( The sisters ) ( ( are ( ( hugging goodbye ) ( while ( holding ( to ( ( go packages ) ( after ( just ( eating lunch ) ) ) ) ) ) ) ) ) . ) )", "sentence2_parse": "(ROOT (S (NP (DT The) (NNS sisters)) (VP (VBP are) (VP (VBG hugging) (NP (UH goodbye)) (PP (IN while) (S (VP (VBG holding) (S (VP (TO to) (VP (VB go) (NP (NNS packages)) (PP (IN after) (S (ADVP (RB just)) (VP (VBG eating) (NP (NN lunch))))))))))))) (. .)))"}"""
+    assert convert_line(line) is None
 
 
 if __name__ == '__main__':
