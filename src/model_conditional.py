@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from unittest.mock import Mock
 from gensim.models import KeyedVectors
-from keras.layers import Embedding, Input, Dense, LSTM, concatenate
+from keras.layers import Embedding, Input, Dense, LSTM, concatenate, Dropout
 from keras.models import Sequential, Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.utils.np_utils import to_categorical
@@ -58,8 +58,9 @@ class ConditionalEncodingModel:
                                   self.word2vec.shape[1],
                                   weights=[self.word2vec],
                                   trainable=False)(premise_input)
-        premise_lstm = LSTM(self.premise_k)  #, dropout=self.premise_dropout)
-        premise_encoded = premise_lstm(premise_embed)
+        premise_dropout = Dropout(self.premise_dropout)(premise_embed)
+        premise_lstm = LSTM(self.premise_k)
+        premise_encoded = premise_lstm(premise_dropout)
 
         # Encode hypothesis by another LSTM
         hyp_input = Input(shape=(self.hyp_maxlen, ), dtype='int32', name='hyp_input')
@@ -67,13 +68,13 @@ class ConditionalEncodingModel:
                               self.word2vec.shape[1],
                               weights=[self.word2vec],
                               trainable=False)(hyp_input)
-        hyp_lstm = LSTM(self.hyp_k) #, dropout=self.hyp_dropout)
-        hyp_encoded = hyp_lstm(hyp_embed)
+        hyp_dropout = Dropout(self.hyp_dropout)(hyp_embed)
+        hyp_lstm = LSTM(self.hyp_k)
+        hyp_encoded = hyp_lstm(hyp_dropout)
 
         # Make a prediction from the last output vector
-        merged = concatenate([premise_encoded, hyp_encoded], axis=-1)
-
         NUM_CLASSES = 3
+        merged = concatenate([premise_encoded, hyp_encoded], axis=-1)
         predictions = Dense(NUM_CLASSES, activation='softmax')(merged)
 
         # Compile the model
@@ -264,7 +265,7 @@ class Test_ConditionalEncodingModel:
 
 
 def read_tsv(path):
-    return [line.split('\t') for line in open(path).read().split('\n')]
+    return [line.split('\t') for line in open(path).read().split('\n') if line]
 
 def read_dataset(path):
     dataset = []
