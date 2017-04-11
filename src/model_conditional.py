@@ -3,12 +3,13 @@
 Neural Attention" (Rocktäschel, 2016).
 """
 
+import argparse
 import os
 import numpy as np
 import pytest
 from unittest.mock import Mock
 from gensim.models import KeyedVectors
-from keras.layers import Embedding, Input, Dense, LSTM
+from keras.layers import Embedding, Input, Dense, LSTM, concatenate
 from keras.models import Sequential, Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.utils.np_utils import to_categorical
@@ -28,11 +29,13 @@ class ConditionalEncodingModel:
         hyp_k (int): number of hyp LSTM units.
         hyp_dropout (float): hyp LSTM dropout rate.
         seed (int): random generator seed.
+        vocab_limit (int): if set, use only that many top words.
     """
 
     def __init__(self, word2vec, debug=False, **kwargs):
         self._word2vec = word2vec
         self._vocab = None
+        self._vocab_index = None
         self._word2vec_loaded = False
         self.debug = debug
         self.maxlen = kwargs.pop('maxlen', 20)
@@ -42,6 +45,7 @@ class ConditionalEncodingModel:
         self.hyp_maxlen = kwargs.pop('hyp_maxlen', 20)
         self.hyp_k = kwargs.pop('hyp_k', 100)
         self.hyp_dropout = kwargs.pop('hyp_dropout', 0.1)
+        self.vocab_limit = kwargs.pop('vocab_limit', None)
 
         self._model = None
         self._rng = np.random.RandomState(kwargs.pop('seed', 0))
@@ -67,8 +71,10 @@ class ConditionalEncodingModel:
         hyp_encoded = hyp_lstm(hyp_embed)
 
         # Make a prediction from the last output vector
+        merged = concatenate([premise_encoded, hyp_encoded], axis=-1)
+
         NUM_CLASSES = 3
-        predictions = Dense(NUM_CLASSES, activation='softmax')(hyp_encoded)
+        predictions = Dense(NUM_CLASSES, activation='softmax')(merged)
 
         # Compile the model
         model = Model(inputs=[premise_input, hyp_input], outputs=predictions)
@@ -80,7 +86,7 @@ class ConditionalEncodingModel:
             self._model = self.build()
         return self._model
 
-    def fit(self, data):
+    def fit(self, data, **kwargs):
         """Train the model.
 
         Args:
@@ -88,19 +94,25 @@ class ConditionalEncodingModel:
                 where `label` is a string, one of 'neutral', 'entailment',
                 'contradiction', `premise` and `hypothesis` are tokenized
                 premise sentences (each is a list of string tokens).
+            epochs (int, optional): number of epochs
 
         Returns:
             keras.history object
 
         """
 
-        # Prepare data
+        epochs = kwargs.pop('epochs', 3)
+        self._load_word2vec()
+
+        self._log_start('Vectorize data... ')
         labels = {'neutral': 0, 'contradiction': 1, 'entailment': 2}
         Y = to_categorical([labels[y] for y, *_ in data])
+
         premise = [self.vectorize(p) for _, p, h in data]
         hyp = [self.vectorize(h) for _, p, h in data]
         premise = pad_sequences(premise, maxlen=self.premise_maxlen, value=0, padding='pre')
         hyp = pad_sequences(hyp, maxlen=self.hyp_maxlen, value=0, padding='post')
+        self._log_done()
 
         model = self.model
         early_stopping = EarlyStopping(monitor='val_loss', patience=4)
@@ -113,7 +125,7 @@ class ConditionalEncodingModel:
                       callbacks=[reduce_lr, early_stopping, checkpoint])
         history = model.fit([premise, hyp], Y,
                             validation_split=0.25,
-                            epochs=3)
+                            epochs=epochs)
         return history
 
     def predict(self, data):
@@ -126,10 +138,12 @@ class ConditionalEncodingModel:
             list of string labels ('neutral', 'contradiction', or 'entailment')
         """
 
+        self._log_start('Vectorize data... ')
         premise = [self.vectorize(p) for p, h in data]
         hyp = [self.vectorize(h) for p, h in data]
         premise = pad_sequences(premise, maxlen=self.premise_maxlen, value=0, padding='pre')
         hyp = pad_sequences(hyp, maxlen=self.hyp_maxlen, value=0, padding='post')
+        self._log_done()
 
         predictions = self.model.predict([premise, hyp])
         labels = ['neutral', 'contradiction', 'entailment']
@@ -137,10 +151,12 @@ class ConditionalEncodingModel:
         return result
 
     def save(self, path):
-        model.save(path)
+        self._log_start("Saving model to {}".format(path))
+        self.model.save(path)
+        self._log_done()
 
     def vectorize(self, sentence):
-        V = {word: index for index, word in enumerate(self.vocab)}
+        V = self.vocab_index
         assert '<unk>' in V
         result = np.empty_like(sentence, dtype=np.int32)
         for i, token in enumerate(sentence):
@@ -154,23 +170,31 @@ class ConditionalEncodingModel:
     @property
     def word2vec(self):
         """Lazily load word2vec embeddings. """
-        if not self._word2vec_loaded:
-            self._load_word2vec()
-            self._word2vec_loaded = True
+
+        self._load_word2vec()
         return self._word2vec
 
     @property
     def vocab(self):
         """List of known words. """
-        if not self._word2vec_loaded:
-            self._load_word2vec()
-            self._word2vec_loaded = True
+
+        self._load_word2vec()
         return self._vocab
+    
+    @property
+    def vocab_index(self):
+        """{word: index} mapping. """
+
+        self._load_word2vec()
+        return self._vocab_index
 
     def _load_word2vec(self):
+        if self._word2vec_loaded:
+            return
+
         if isinstance(self._word2vec, str):
-            print("Loading word2vec... ", end='', flush=True)
-            limit = 10000 if self.debug else None
+            self._log_start("Loading word2vec... ")
+            limit = 10000 if self.debug else self.vocab_limit
             vecs = KeyedVectors.load_word2vec_format(
                 self._word2vec, binary=True, limit=limit)
         else:
@@ -182,9 +206,18 @@ class ConditionalEncodingModel:
         # Make sure we have a random <unk> vector
         if not '<unk>' in self._vocab:
             dim = vecs.syn0.shape[1]
-            random_vec = self.rng.randn(dim)
+            random_vec = self._rng.randn(dim)
             self._vocab.append('<unk>')
             self._word2vec = np.vstack((vecs.syn0, random_vec))
+
+        self._vocab_index = {word: index for index, word in enumerate(self._vocab)}
+        self._word2vec_loaded = True
+        self._log_done()
+
+    def _log_start(self, msg):
+        print(msg, end='', flush=True)
+    
+    def _log_done(self):
         print("done")
 
 
@@ -233,16 +266,44 @@ class Test_ConditionalEncodingModel:
 def read_tsv(path):
     return [line.split('\t') for line in open(path).read().split('\n')]
 
+def read_dataset(path):
+    dataset = []
+    for label, premise, hyp in read_tsv(path):
+        dataset.append((label, premise.split(), hyp.split()))
+    return dataset
+
+
+def cmd_train(args):
+    dataset = read_dataset(args.data)
+    model = ConditionalEncodingModel(word2vec=args.word2vec,
+                                     vocab_limit=args.vocab_limit,
+                                     )
+    model.fit(dataset, epochs=args.epochs)
+    model.save(args.output)
+
 
 if __name__ == '__main__':
-    model = ConditionalEncodingModel(
-        word2vec="/Users/oleksiy.syvokon/data/word2vec/GoogleNews-vectors-negative300.bin")
-
     here = os.path.dirname(__file__)
     data = os.path.join(here, '../data/')
-    path = os.path.join(data, 'model_two_lstm.keras')
-    dataset = read_tsv(os.path.join(data, 'train.txt'))
 
-    model.build()
-    model.fit(dataset)
-    model.save(path)
+    parser = argparse.ArgumentParser()
+    parser.set_defaults(func=lambda _: parser.print_help())
+
+    subparsers = parser.add_subparsers()
+    sub = subparsers.add_parser('train', help="Train model")
+    sub.set_defaults(func=cmd_train)
+    sub.add_argument('output', help='File to save trained model')
+    sub.add_argument('--epochs', help='Number of epochs. Default is %(default)s',
+                     default=30, type=int)
+    sub.add_argument('--data', default=os.path.join(data, 'train.txt'),
+                        help='Path to the training data. Default is %(default)s')
+    sub.add_argument('--word2vec', default=os.path.join(data, 'word2vec.bin'),
+                        help='Word2vec binary file. Default is %(default)s')
+    sub.add_argument('--vocab-limit', default=None, type=int,
+                        help='Use that many most popular words')
+
+    args = parser.parse_args()
+    if args.func:
+        args.func(args)
+    else:
+        parser.print_help()
