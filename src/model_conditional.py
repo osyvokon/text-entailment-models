@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Conditional encoding model as described in "Reasoning About Entailment With
 Neural Attention" (Rocktäschel, 2016).
+
+#############################################
+# WARNING
+#
+# FOR NOW, THIS ONLY IMPLEMENTS BOWMAN 2015!
+# 
+#############################################
+
 """
 
 import argparse
