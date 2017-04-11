@@ -24,6 +24,7 @@ setup(
         'pytest',
         'keras',
         'recurrentshop',
+        'gensim',
     ],
 
     extras_require={
