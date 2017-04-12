@@ -16,7 +16,7 @@ install:
 train: data/train.txt
 	python ./src/model_conditional.py train \
 		--data ./data/train.txt \
-		--vocab-limit 50000 \
+		--vocab-limit 70000 \
 		./data/model_conditional.bin
 
 
