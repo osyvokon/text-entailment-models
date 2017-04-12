@@ -41,7 +41,9 @@ train-bowman: data/train.txt
 
 
 data/snli_1.0:
-	curl https://nlp.stanford.edu/projects/snli/snli_1.0.zip | tar -xzf- -C ./data/
+	cd data && wget https://nlp.stanford.edu/projects/snli/snli_1.0.zip
+	cd data && unzip snli_1.0.zip
+	rm ./data/snli_1.0.zip
 
 data/train.txt: data/snli_1.0
 	python ./src/prepare_data.py ./data/snli_1.0/ ./data/
