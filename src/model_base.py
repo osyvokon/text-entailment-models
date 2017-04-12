@@ -125,7 +125,7 @@ class BaseModel:
         return result
 
     def save(self, path):
-        self._log_start("Saving model to {}".format(path))
+        self._log_start("Saving model to {}... ".format(path))
         self.model.save(path)
         self._log_done()
 
