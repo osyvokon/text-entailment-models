@@ -5,7 +5,7 @@ Neural Attention" (Rocktäschel, 2016).
 #############################################
 # WARNING
 #
-# FOR NOW, THIS ONLY IMPLEMENTS BOWMAN 2015!
+# STATE TRANSFERING IS NOT YET IMPLEMENTED!!
 # 
 #############################################
 
@@ -24,6 +24,23 @@ from keras.utils.np_utils import to_categorical
 from keras.preprocessing.sequence import pad_sequences
 
 from model_base import BaseModel, read_dataset
+
+
+class ConditionedLSTM(LSTM):
+    """LSTM that can have it's memory state initialized.
+
+    NOT IMPLEMENTED!
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.kernel_c_value = kwargs.pop('kernel_c_value', None)
+        self.recurrent_kernel_c_value = kwargs.pop('recurrent_kernel_c_value', None)
+        super().__init__(*args, **kwargs)
+
+    def build(self, input_shape):
+        raise NotImplemented
+        super().build(input_shape)
 
 
 class ConditionalEncodingModel(BaseModel):
@@ -45,7 +62,6 @@ class ConditionalEncodingModel(BaseModel):
     def __init__(self, word2vec, debug=False, **kwargs):
         super().__init__(word2vec, debug, **kwargs)
 
-        self.maxlen = kwargs.pop('maxlen', 20)
         self.premise_maxlen = kwargs.pop('premise_maxlen', 20)
         self.premise_k = kwargs.pop('premise_k', 100)
         self.premise_dropout = kwargs.pop('premise_dropout', 0.1)
@@ -54,8 +70,6 @@ class ConditionalEncodingModel(BaseModel):
         self.hyp_dropout = kwargs.pop('hyp_dropout', 0.1)
         self.vocab_limit = kwargs.pop('vocab_limit', None)
 
-        self._model = None
-
     def build(self):
 
         # Encode premise by the first LSTM
@@ -63,6 +77,7 @@ class ConditionalEncodingModel(BaseModel):
         premise_embed = Embedding(self.word2vec.shape[0],
                                   self.word2vec.shape[1],
                                   weights=[self.word2vec],
+                                  mask_zero=True,
                                   trainable=False)(premise_input)
         premise_dropout = Dropout(self.premise_dropout)(premise_embed)
         premise_lstm = LSTM(self.premise_k)
@@ -73,6 +88,7 @@ class ConditionalEncodingModel(BaseModel):
         hyp_embed = Embedding(self.word2vec.shape[0],
                               self.word2vec.shape[1],
                               weights=[self.word2vec],
+                              mask_zero=True,
                               trainable=False)(hyp_input)
         hyp_dropout = Dropout(self.hyp_dropout)(hyp_embed)
         hyp_lstm = LSTM(self.hyp_k)
