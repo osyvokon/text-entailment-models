@@ -13,11 +13,18 @@ install:
 
 
 
-train: data/train.txt
+
+train-conditional: data/train.txt
 	python ./src/model_conditional.py train \
 		--data ./data/train.txt \
 		--vocab-limit 70000 \
-		./data/model_conditional.bin
+		./trained/model_conditional.bin
+
+train-bowman: data/train.txt
+	python ./src/model_bowman.py train \
+		--data ./data/train.txt \
+		--vocab-limit 70000 \
+		./trained/model_bowman.bin
 
 
 data/snli_1.0:
