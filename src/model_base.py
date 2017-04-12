@@ -191,7 +191,7 @@ class BaseModel:
             self._log_start("Loading word2vec... ")
             limit = 10000 if self.debug else self.vocab_limit
             vecs = KeyedVectors.load_word2vec_format(
-                self._word2vec, binary=True, limit=limit)
+                self._word2vec, binary=False, limit=limit)
         else:
             vecs = self._word2vec
 
