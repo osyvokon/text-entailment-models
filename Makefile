@@ -23,8 +23,8 @@ glove: ./data/glove.6B.300d.txt
 
 train-attention: data/train.txt
 	python ./src/model_global_attention.py train \
-		--data ./data/train.txt \
-		--vocab-limit 70000 \
+		--data ./data/train-1k.txt \
+		--vocab-limit 10000 \
 		./trained/model_global_attention.bin
 
 train-conditional: data/train.txt

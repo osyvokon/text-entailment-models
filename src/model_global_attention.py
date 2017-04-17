@@ -14,7 +14,6 @@ from keras.layers import Embedding, Input, Dense, LSTM, concatenate, Dropout, La
 from keras.models import Sequential, Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.utils.np_utils import to_categorical
-from keras.preprocessing.sequence import pad_sequences
 import keras.backend as K
 
 from model_base import BaseModel, read_dataset
@@ -203,7 +202,7 @@ if __name__ == '__main__':
                      default=30, type=int)
     sub.add_argument('--data', default=os.path.join(data, 'train.txt'),
                         help='Path to the training data. Default is %(default)s')
-    sub.add_argument('--word2vec', default=os.path.join(data, 'word2vec.bin'),
+    sub.add_argument('--word2vec', default=os.path.join(data, 'word2vec.txt'),
                         help='Word2vec binary file. Default is %(default)s')
     sub.add_argument('--vocab-limit', default=None, type=int,
                         help='Use that many most popular words')
