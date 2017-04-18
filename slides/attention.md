@@ -82,12 +82,28 @@ network.
 
 ![:scale 100%](img/encoder-decoder.png)
 
+
+???
+
+Read source sentence one token a time. Often, token is a word,
+but also can be a character or sub-word.
+
+Compute the source sentence embedding from the sequence of hidden states
+$$h_1 ... h_n$$.
+In the simpliest case (which works reasonably well), just take
+
 ---
+
+# Encoder-decoder
+
+![:scale 100%](img/encoder-decoder.png)
+
+State bottleneck: 
 
 # Content-based neural attention
 
 
-.left-column30 ![:scale 80%](img/bahdanau.jpeg) 
+.left-column30[![:scale 80%](img/bahdanau.jpeg)]
 
 .right-column70
 #### Neural Machine Translation by Jointly Learning to Align and Translate
