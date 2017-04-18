@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Title</title>
+    <title>Neural Attention Mechanism in NLP</title>
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -30,15 +30,26 @@
   <body>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
     <script>
       remark.macros.scale = function (percentage) {
         var url = this;
         return '<img src="' + url + '" style="width: ' + percentage + '" />';
       };
 
-      var slideshow = remark.create({
-        sourceUrl: "attention.md"
-      });
+      var renderMath = function() {
+        renderMathInElement(document.body, {
+          delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "\\(", right: "\\)", display: false},
+        ]});
+      }
+      var slideshow = remark.create({sourceUrl: 'attention.md'}, renderMath);
+
     </script>
   </body>
 </html>
