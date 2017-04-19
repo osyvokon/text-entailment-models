@@ -141,9 +141,13 @@ well with long sentences. Intuitevely, when we try to cramp the long and/or
 complicated sentence into a fixed-sized vector, we will inevitably loose
 details that are important for tasks like translation.
 
-It would be nice if we could return ("attend") to the original sentence many 
-times as we generating an output sequence. That is where attention mechanism
-comes into play.
+That is where attention mechanism comes into play.
+
+What we humans do when translating, is regularaly look onto the source sentence
+a couple words a time. We don't just read the source sentence once and then
+throw it away. We keep it around and concentrate on relevant parts of it when
+needed. That is the basic idea behind the attention mechanism: let's keep the
+source hidden states pool and draw relevant parts of it on the decoder stage.
 
 ---
 
@@ -153,10 +157,7 @@ comes into play.
 
 ???
 
-What we humans do when translating, is regularaly look onto the source sentence
-a couple words a time.
-
-When I at the start of the sentence, I will look at the word "cat".
+For example, when at the start of the sentence, I will look at the word "cat".
 
 ---
 
@@ -166,8 +167,8 @@ When I at the start of the sentence, I will look at the word "cat".
 
 ???
 
-Then I move to the next word, and only interested in it (and maybe also in
-some surroinding context as well as in the general context of what this
+Then I move to the next word, and only interested in the second word (and maybe
+also in some surroinding context as well as in the general context of what this
 sentence is all about).
 
 ---
@@ -178,7 +179,7 @@ sentence is all about).
 
 ???
 
-Finally, I get the last part.
+Finally, I get to the last part.
 
 ---
 
@@ -200,8 +201,7 @@ the alignment matrix:
 # Content-based neural attention
 
 
-.left-column30
-![:scale 10%](img/bahdanau.jpeg) 
+.left-column30[![:scale 90%](img/bahdanau.jpeg)]
 
 .right-column70[
 #### Neural Machine Translation by Jointly Learning to Align and Translate
@@ -222,28 +222,290 @@ Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
 
 ---
 
-# Content-based neural attention
+## Encoder-decoder, no attention
 
-Concatenate hidden state vectors corresponding to the input into a matrix $H$:
+.small[.left-column30[
+1. Run RNN over the input:
+<div>$$h_t = \text{RNN}(\text{embed}(x_t, h_{t-1}))$$</div>
 
-$$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
+2.  Concatenate hidden state vectors into a matrix $H$:
+  $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
+
+3. Encode input sequence into a vector $c$:
+  $$c = q(H)$$
+
+  For example,
+  $$c = h_n$$
+
+4. Predict the next output word:
+<div>$$y_t = g(y_{t-1}, s_{t-1}, c)$$</div>
+
+]]
+
+.right-column70[.right[![:scale 100%](img/encoder-decoder.png)]]
 
 ???
 
-Okay, let's dig into some details.
+Okay, let's have a more formalized look at what we've just discussed.
+We have an input sequence of words, $x_1 ... x_n$. We map this input into
+embedding vectors. Then we we run recurrent neural, producing hidden states
+$h_1 ... h_n$ along the way.
+
+For the *non-attention* case, we then summary the whole source sentence into
+a single vector $\mathbf{c}\$, commonly by just taking the last hidden state
+and discarding all others.
+
+We use that context vector to predict output sequence one word a time.
+
+---
+
+## Encoder-decoder, content-based attention
+
+.small[.left-column30[
+1. Run RNN over the input:
+<div>$$h_t = \text{RNN}(\text{embed}(x_t, h_{t-1}))$$</div>
+
+2. Concatenate hidden state vectors into a matrix $H$:
+  $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
+
+3. Generate new context vector for each output word:
+<div>
+  $$c_i = H \mathbf{\alpha}_t$$
+</div>
+
+4. Predict the next output word:
+<div>$$y_t = g(y_{t-1}, s_{t-1}, \color{red}{c_i})$$</div>
+
+]]
+
+.right-column70[.right[![:scale 100%](img/encoder-decoder.png)]]
+
+???
+
+Now, let's see what changes with the attention.
 
 As before, we start by encoding the source sentence with RNN (often, with a
 bi-directional RNN, but that doesn't really matter). This time we keep around
 hidden state vectors corresponding to the input words. Let's concatenate them
-in a matrix $H$:
+in a matrix $H$.
 
-$$ H = \[ h_1 h_2 ... h_n \] $$
+Now comes the difference. Instead of computing sentence embedding (which is
+also called a *context vector*) just once, we will do it again and again
+for each of the output words. Decoder will be getting a context that is
+specifically crafted for predicting each output.
 
+What does this context vector look like? Well, it's just a weighted combination
+of the input states ${h_1, h_2, ..., h_n}$:
+
+<div>
+  $$\mathbf{c}_i = H \mathbf{\alpha}_t$$
+</div>
 
 
 ---
 
+## Attention and context vectors
 
+.left-column50[
+
+Context vector $\mathbf{c}_i$ is a weighted sum over the source sentence:
+
+<div>
+$$\begin{aligned}
+
+\mathbf{c}_i &= H \mathbf{\alpha}_t 
+ \\
+ &= \sum_{j=1}^n h_j \alpha_{ij}
+
+\end{aligned}$$
+</div>
+
+Attention vector $\mathbf{\alpha_t}$ tells us how much should we focus on a
+particular source word at a time step $t$:
+]
+
+.right-column50[![:scale 100%](img/attention-vector-1.png)]
+
+
+---
+
+## Attention and context vectors
+
+.left-column50[
+
+Context vector $\mathbf{c}_i$ is a weighted sum over the source sentence:
+
+<div>
+$$\begin{aligned}
+
+\mathbf{c}_i &= H \mathbf{\alpha}_t 
+ \\
+ &= \sum_{j=1}^n h_j \alpha_{ij}
+
+\end{aligned}$$
+</div>
+
+Attention vector $\mathbf{\alpha_t}$ tells us how much should we focus on a
+particular source word at a time step $t$:
+]
+
+.right-column50[![:scale 100%](img/attention-vector-2.png)]
+
+---
+
+## Attention and context vectors
+
+.left-column50[
+
+Context vector $\mathbf{c}_i$ is a weighted sum over the source sentence:
+
+<div>
+$$\begin{aligned}
+
+\mathbf{c}_i &= H \mathbf{\alpha}_t 
+ \\
+ &= \sum_{j=1}^n h_j \alpha_{ij}
+
+\end{aligned}$$
+</div>
+
+Attention vector $\mathbf{\alpha_t}$ tells us how much should we focus on a
+particular source word at a time step $t$:
+]
+
+.right-column50[![:scale 100%](img/attention-vector-3.png)]
+
+---
+
+class: left
+
+## How to compute attention
+
+
+1. Compute the decoder's hidden state:
+
+   <div>$$h_t = \text{RNN}([\text{embed}(y_{t-1}); c_{t-1}], h_{t-1})$$</div>
+
+--
+2. Calculate an attention score $a_t$:
+
+   <div>$$a_{t,j} = \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) $$</div>
+
+--
+3. Normalize that:
+
+    <div>$$\mathbf{\alpha}_t = \text{softmax}(a_t)$$</div>
+
+???
+
+From where do we get this $\alpha_t$? 
+
+Firstly, compute the decoder's hidden state $h\_t$ . Note, that we expand its
+input to include the context vector $c_{t-1}$ from the previous step.
+
+`attention_score` can be any function that takes two vectors as input
+and outputs a score about how much we should focus on this particular
+word encoding $h_j^{src}$. We will discuss this in more details in a second.
+
+Finally, we normalize attention scores to get the properties we need:
+it should sum to one and all its elements should be between 0 and 1.
+This is what we need to get linear combination of the input hidden vectors.
+
+---
+
+## Attention step-by-step
+
+* Encode the source sentence.
+
+![:scale 100%](img/encoder-decoder-attention-overview 0.png)
+
+---
+
+## Attention step-by-step
+
+* Compute the first hidden state of the decoder.
+
+![:scale 100%](img/encoder-decoder-attention-overview 1.png)
+
+???
+
+  - start-of-sentence token as a word input
+  - null context vector
+  - previous state taken to be the source sentence encoding
+
+---
+
+## Attention step-by-step
+
+* Compute the attention vector.
+
+![:scale 100%](img/encoder-decoder-attention-overview 2.png)
+
+---
+
+## Attention step-by-step
+
+* Compute the context vector.
+
+![:scale 100%](img/encoder-decoder-attention-overview 3.png)
+
+---
+
+## Attention step-by-step
+
+* Predict the first word
+
+![:scale 100%](img/encoder-decoder-attention-overview 4.png)
+
+---
+
+## Attention step-by-step
+
+* Use that context vector and the predicted word to get next hidden state
+
+![:scale 100%](img/encoder-decoder-attention-overview 5.png)
+
+---
+
+## Attention step-by-step
+
+* Repeat
+
+![:scale 100%](img/encoder-decoder-attention-overview 6.png)
+
+---
+
+## Recap
+
+1. What problem attention solves?
+
+2. What is a context vector $c_i$?
+
+3. What is attention vector $\alpha_t$?
+
+4. How to compute attention vector? 
+
+    -- that we don't know yet
+
+???
+
+By now, we should have a solid intuition of what attention mechanism tries
+to achieve. We also saw how it's used to calculate context vectors and how
+we pass those into the decoder RNN. This remaining missing piece is how
+to get the attention score.
+
+---
+
+## Attention scores
+
+
+???
+
+
+
+
+
+---
 
 # Attention intuition
 
@@ -255,7 +517,7 @@ $$ H = \[ h_1 h_2 ... h_n \] $$
 
 # Other Applications
 
-* Caption generationA [Show, Attend and Tell]
+* Caption generation [Show, Attend and Tell]
 
 
 # Gated Attention
