@@ -186,13 +186,16 @@ Finally, I get to the last part.
 
 # Attention intuition: words alignment
 
-TODO: Alignment matrix
+.right[.medium[*NMT by Jointly Learning to Align and Translate ([Bahdanau, 2014](https://arxiv.org/abs/1409.0473))*]]
+
+![:scale 50%](img/bahdanau-alignment.png)
+
 
 ???
 
 Turns out, machine translation has known this long before recurrent nets
 revivals. They call it "words alignment", and it can be represented by
-the alignment matrix:
+the alignment matrix.
 
 ---
 
@@ -483,9 +486,7 @@ This is what we need to get linear combination of the input hidden vectors.
 
 3. What is attention vector $\alpha_t$?
 
-4. How to compute attention vector? 
-
-    -- that we don't know yet
+4. How to compute attention vector?  (that we don't know yet)
 
 ???
 
@@ -496,28 +497,153 @@ to get the attention score.
 
 ---
 
+## Ways to compute attention scores
+
+### Dot product:
+
+<div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = h_j^{(src)\intercal}  h_t^{(dest)} $$</div>
+
+.medium[
+Pros:
+  * adds no additional parameters
+  * simple and fast
+
+Cons:
+  * forces input and output hidden vectors to be in the same space
+]
+
+???
+The simplest option is to measure similarity between query and keys by taking
+dot product (скалярний добуток) between two vectors. The advantage of this
+model is that it adds no additional parameters. Disadvantage is that it's not
+flexible, forcing input and output hidden states be in the same space.  In
+order for dot product to be high, vectors must lay close to each other.
+
+---
+
+## Ways to compute attention scores
+
+### Bilinear functions:
+
+<div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = h_j^{(src)\intercal} W_a  h_t^{(dest)} $$</div>
+
+.medium[
+
+Pros:
+  * more flexible
+
+Cons:
+  * adds quite a few parameters
+]
+
+???
+By performing a linear transform parametrized by $W_a$ we relax the
+restriction that the source and target embeddings msut be in the same
+space. On the other hand, it adds quite a few parameters.
+
+---
+
+## Ways to compute attention scores
+
+### Multi-layer perceptrons:
+
+<div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = w_{a2}^\intercal \tanh(W_{a1} [h_j^{(src)}; h_t^{(dest)}])$$</div>
+
+.medium[
+
+Pros:
+  * flexible
+  * fewer parameters
+
+Cons:
+  * doesn't fit complex structures
+]
+
+
+???
+Multi-layer perceptron was the method originally employed by Bahdanau.
+This is more flexible that the dot product method, usually has fewer
+parameters of the three, and generally provides good results.
+
+---
+
 ## Attention scores
+
+### Advanced methods
+
+* Recurrent NNs
+
+* Tree-structured networks
+
+* Convolutional NNs
+
+* Structured models
+
+...and more
 
 
 ???
 
+RNN attention: very complicated, +3 BLUU for English-German
 
-
-
+>>> Knowing which words have been attended to in previous time steps while generating a translation is a rich source of
+information for predicting what words will be attended to in the future. We
+improve upon the attention model of Bahdanau et al. (2014) by explicitly
+modeling the relationship between previous and subsequent attention levels for
+each word using one recurrent network per input word. This architecture easily
+captures informative features, such as fertility and regularities in relative
+distortion. In experiments, we show our parameterization of attention improves
+translation quality.
 
 ---
 
-# Attention intuition
+## Image Caption Generation
 
-* Simple random access memory
-* Can access source states as needed
+.right[.medium[*Show, Attend and Tell: Neural Image Caption Generation with Visual Attention* ([Xu et al., 2016](https://arxiv.org/abs/1502.03044))]]
 
+![:scale 80%](img/show-attend-tell-arch.png)
 
 ---
 
-# Other Applications
+## Soft vs. Hard attention
 
-* Caption generation [Show, Attend and Tell]
+.right[.medium[*Show, Attend and Tell: Neural Image Caption Generation with Visual Attention* ([Xu et al., 2016](https://arxiv.org/abs/1502.03044))]]
+
+Soft: weighted sum of features.
+
+Differentiable, but wasteful.
+
+![:scale 80%](img/show-attend-tell-soft.png)
+
+???
+
+"Show, Attend and Tell" introduces two modes of attention.
+
+Soft is just a weighted sum of features. It’s easy to compute because it’s
+differentiable. At the same time, on each step we attend the whole input
+sequence, so that's computationally expensive and comes against intuition
+(humans don't do it that way).
+
+---
+
+## Soft vs. Hard attention
+
+.right[.medium[*Show, Attend and Tell: Neural Image Caption Generation with Visual Attention* ([Xu et al., 2016](https://arxiv.org/abs/1502.03044))]]
+
+Hard: take only one feature according to $\alpha$.
+
+Nnon-differentiable, but faster on prediction time.
+
+![:scale 80%](img/show-attend-tell-hard.png)
+
+???
+
+Hard attention means take only one feature according to alpha. Derivative is
+zero almost everywhere, so cannot backpropagate and need to train with
+methods like reinforcement learning -- much slower to train than with
+backprop.
+
+---
 
 
 # Gated Attention
@@ -534,11 +660,53 @@ to get the attention score.
 
 ---
 
+## Neural Machine Translation with Recurrent Attention Modeling
+
+
+---
+
 # Attention-over-Attention
 
-Introduced in [Cui, Chen, 2016] for cloze-style
-reading comprehension task.
+Introduced in [Cui, Chen, 2016] for cloze-style reading comprehension task.
 
+---
+
+# Hierarchical Attention Networks
+
+.right[.medium[*Hierarchical Attention Networks for Document Classification ([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
+
+
+![:scale 50%](./img/hierarchical-att.png)
+
+???
+Hierarchical Attention Networks for Document Classification
+
+---
+
+# Hierarchical Attention Networks
+
+.right[.medium[*Hierarchical Attention Networks for Document Classification ([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
+
+SOTA on document classification.
+
+
+| Method            | Yelp'15 | IMDB |
+| ----------------- | ------- | ---- |
+| SVM + Features    | 62.4    | 40.5 |
+| LSTM              | 58.2    | -    |
+| LSTM-GRNN         | 67.6    | 45.3 |
+| Hierarchical Ave  | 69.9    | 47.8 |
+| Hierarchical ATT  | **71.0**  | **49.4** |
+
+---
+
+# Hierarchical Attention Networks
+
+.right[.medium[*Hierarchical Attention Networks for Document Classification ([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
+
+Predicting YELP rating:
+
+![:scale 60%](./img/hierarchical-yelp.png)
 
 ---
 
