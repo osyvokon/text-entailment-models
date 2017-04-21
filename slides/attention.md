@@ -374,7 +374,7 @@ We use that context vector to predict output sequence one word a time.
 
 .small[.left-column30[
 1. Run RNN over the input:
-<div>$$h_t = \text{RNN}(\text{embed}(x_t, h_{t-1}))$$</div>
+<div>$$h_t = \text{RNN}(\text{embed}(x_t), h_{t-1})$$</div>
 
 2. Concatenate hidden state vectors into a matrix $H$:
   $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
@@ -488,6 +488,90 @@ particular source word at a time step $t$:
 
 ---
 
+## Attention step-by-step
+
+.block[
+* Encode the source sentence:
+    <div>$$h_t = \text{RNN}(\text{embed}(x_t), h_{t-1}))$$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 0.png)
+
+---
+
+## Attention step-by-step
+
+.block[
+* Compute the first hidden state of the decoder:
+   <div>$$h_7 = \text{RNN}([\text{embed}(\varnothing); c_0], h_6)$$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 1.png)
+
+???
+
+  - start-of-sentence token as a word input
+  - null context vector
+  - previous state taken to be the source sentence encoding
+
+---
+
+## Attention step-by-step
+
+.block[
+* Compute the attention vector:
+
+   <div>$$\mathbf{\alpha}_{7} = \text{softmax}(\text{attention\_score}(H^{(src)}, h_7)) $$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 2.png)
+
+---
+
+## Attention step-by-step
+
+.block[
+* Compute the context vector:
+
+    <div>$$ \mathbf{c}_7 = H \mathbf{\alpha}_7 $$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 3.png)
+
+---
+
+## Attention step-by-step
+
+.block[
+* Predict the first word:
+    <div>$$y_7 = \text{softmax}(\text{embed}(\varnothing), h_6, c_7)$$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 4.png)
+
+---
+
+## Attention step-by-step
+
+.block[
+* Use that context vector and the predicted word to get next hidden state
+   <div>$$h_8 = \text{RNN}([\text{embed}(y_7); c_7], h_7)$$</div>
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 5.png)
+
+---
+
+## Attention step-by-step
+
+.block[
+* Repeat
+]
+
+![:scale 100%](img/encoder-decoder-attention-overview 6.png)
+
+---
+
 class: left
 
 ## How to compute attention
@@ -507,6 +591,19 @@ class: left
 
     <div>$$\mathbf{\alpha}_t = \text{softmax}(\mathbf{a}_t)$$</div>
 
+--
+4. Calculate context vector:
+
+<div>
+$$\begin{aligned}
+
+\mathbf{c}_i &= H \mathbf{\alpha}_t 
+ \\
+ &= \sum_{j=1}^n h_j \alpha_{ij}
+
+\end{aligned}$$
+</div>
+
 ???
 
 From where do we get this $\alpha_t$? 
@@ -521,68 +618,6 @@ word encoding $h_j^{src}$. We will discuss this in more details in a second.
 Finally, we normalize attention scores to get the properties we need:
 it should sum to one and all its elements should be between 0 and 1.
 This is what we need to get linear combination of the input hidden vectors.
-
----
-
-## Attention step-by-step
-
-* Encode the source sentence.
-
-![:scale 100%](img/encoder-decoder-attention-overview 0.png)
-
----
-
-## Attention step-by-step
-
-* Compute the first hidden state of the decoder.
-
-![:scale 100%](img/encoder-decoder-attention-overview 1.png)
-
-???
-
-  - start-of-sentence token as a word input
-  - null context vector
-  - previous state taken to be the source sentence encoding
-
----
-
-## Attention step-by-step
-
-* Compute the attention vector.
-
-![:scale 100%](img/encoder-decoder-attention-overview 2.png)
-
----
-
-## Attention step-by-step
-
-* Compute the context vector.
-
-![:scale 100%](img/encoder-decoder-attention-overview 3.png)
-
----
-
-## Attention step-by-step
-
-* Predict the first word
-
-![:scale 100%](img/encoder-decoder-attention-overview 4.png)
-
----
-
-## Attention step-by-step
-
-* Use that context vector and the predicted word to get next hidden state
-
-![:scale 100%](img/encoder-decoder-attention-overview 5.png)
-
----
-
-## Attention step-by-step
-
-* Repeat
-
-![:scale 100%](img/encoder-decoder-attention-overview 6.png)
 
 ---
 
