@@ -43,6 +43,8 @@ Ilya is a Co-Founder and Research Director at OpenAI
 
 
 ---
+class: large
+
 
 # Agenda
 
@@ -761,7 +763,7 @@ sequence, so that's computationally expensive and comes against intuition
 
 Hard: take only one feature according to $\alpha$.
 
-Nnon-differentiable, but faster on prediction time.
+Non-differentiable, but faster on prediction time.
 
 ![:scale 80%](img/show-attend-tell-hard.png)
 
@@ -840,3 +842,18 @@ Predicting YELP rating:
 class: center, middle
 
 # Thank you!
+
+
+---
+
+# References
+
+1. Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. 2014. Neural machine
+   translation by jointly learning to align and translate. *arXiv preprint
+   arXiv:1409.0473.*
+
+2. Show, Attend and Tell: Neural Image Caption Generation with Visual Attention. 2016.
+   Xu et al. 2016. arXiv:1502.03044.*
+
+3. Hierarchical Attention Networks for Document Classification. 2016.
+([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
