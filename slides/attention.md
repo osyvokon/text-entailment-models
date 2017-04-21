@@ -16,7 +16,7 @@ research engineer @ Grammarly
 >>> *attention models*, due to their simplicity and due to
 >>> the fact that they work so well.
 >>>
->>> — <cite>Ilya Sutskever</cite>
+>>> — <cite>Ilya Sutskever, Research Director at OpenAI</cite>
 ]
 
 ???
@@ -32,56 +32,94 @@ Ilya is a Co-Founder and Research Director at OpenAI
     * Text comprehension (question answering)
 --
 
-2. Easy to implement and grasp
+2. Practical, doesn't add huge number of parameters.
 --
 
-3. Useful visualisations.
+3. Easy to implement and grasp
+
+--
+
+4. Useful visualisations.
 
 
 ---
 
 # Agenda
 
-1. Prerequisites
+1. Sequence-to-sequence models 101
 
+???
+
+    - sequence-to-sequence models
     - sentence embeddings
-    - sequence-to-sequence 101
-    - encoder-decoder bottleneck
+    - encoder-decoder
+    - state bottleneck problem
 
 --
-2. Attention mechanism
+
+2. Attention mechanism in details
+
+???
 
     - neural translation task
-    - text entailment task
 --
 
-3. Attention advances:
+3. Attention advances and applications:
 
     - soft vs hard
     - local vs global
     - hierarchical
     - attention-over-attention
     - gated
+    - ...
 
 ---
-
-# Sequence-to-sequence models
-
-
+class: center, middle
+# Part I: 
+# Prerequisites
 ---
 
-# Neural Machine Translation
+## Sequence-to-sequence models
 
-Neural Machine Translation (NMT) aims to model the
-entire MT process via **one** big artificial neural
-network.
+![:scale 80%](./img/seq2seq.png)
+
+???
+
+Can feed variable length sequences as input
+and get artbitrary length seqs on output.
+
+--
+
+- Machine translation:
+```
+the cat on the mat => кіт на килимку
+```
+--
+- Image caption generation: ![:scale 20%](./img/cat-on-the-mat.jpg) `=> cat on the mat`
+
+--
+
+- Sequence labeling:
+```
+the cat on the mat => DT NN IN DT NN
+```
+
+???
+
+Determiner, Noun, Preposition, Determiner, Noun
+
+--
+
+- Classification:
+```
+the cat on the mat => CLASS_ANIMALS
+```
 
 ---
 
 # Encoder-decoder
 
 ![:scale 100%](img/encoder-decoder.png)
-
 
 ???
 
@@ -126,6 +164,34 @@ to give more-or-less meaningful results.
 
 ---
 
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder-1.png)
+
+---
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder 2.png)
+---
+
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder 3.png)
+---
+
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder 4.png)
+---
+
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder 5.png)
+---
+
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder 6.png)
+---
+
+# Encoder-decoder
+![:scale 100%](img/encoder-decoder.png)
+---
+
 # Encoder-decoder: state bottleneck
 
 ![:scale 100%](img/encoder-decoder-state-bottleneck.png)
@@ -141,14 +207,31 @@ well with long sentences. Intuitevely, when we try to cramp the long and/or
 complicated sentence into a fixed-sized vector, we will inevitably loose
 details that are important for tasks like translation.
 
-That is where attention mechanism comes into play.
+---
 
-What we humans do when translating, is regularaly look onto the source sentence
-a couple words a time. We don't just read the source sentence once and then
-throw it away. We keep it around and concentrate on relevant parts of it when
-needed. That is the basic idea behind the attention mechanism: let's keep the
-source hidden states pool and draw relevant parts of it on the decoder stage.
+# Content-based neural attention
 
+
+.left-column30[![:scale 70%](img/bahdanau.jpeg)]
+
+.right-column70[
+.medium[*Neural Machine Translation by Jointly Learning to Align and Translate*
+([Bahdanau, 2014](https://arxiv.org/abs/1409.0473))]
+]
+
+???
+
+* ICLR 2015 paper
+* Graduated Belarusian State University
+* 1215 citations so far (and counting) -- every paper about attention cites this.
+* Started the attention boom
+* Simple and effective techinique
+* Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
+
+---
+class: center, middle
+# Part II: 
+# Attention, please!
 ---
 
 # Attention intuition
@@ -156,6 +239,12 @@ source hidden states pool and draw relevant parts of it on the decoder stage.
 ![:scale 100%](img/encoder-decoder-highilght-cat.png)
 
 ???
+
+What we humans do when translating, is regularaly look onto the source sentence
+a couple words a time. We don't just read the source sentence once and then
+throw it away. We keep it around and concentrate on relevant parts of it when
+needed. That is the basic idea behind the attention mechanism: let's keep the
+source hidden states pool and draw relevant parts of it on the decoder stage.
 
 For example, when at the start of the sentence, I will look at the word "cat".
 
@@ -195,33 +284,12 @@ Finally, I get to the last part.
 
 Turns out, machine translation has known this long before recurrent nets
 revivals. They call it "words alignment", and it can be represented by
-the alignment matrix.
+the alignment matrix. Previously, these alignments were computing by a
+separate model. Attention mechanism is effectively implementation
+of words alignment as a part of a single network. That should explain
+the "Jointly Learning to Align and Translate" part of the Bahdanau's
+paper.
 
----
-
-
-
-# Content-based neural attention
-
-
-.left-column30[![:scale 90%](img/bahdanau.jpeg)]
-
-.right-column70[
-#### Neural Machine Translation by Jointly Learning to Align and Translate
-
-Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
-
-2015
-
-]
-
-???
-
-* ICLR 2015 paper
-* Graduated Belarusian State University
-* 1215 citations so far (and counting) -- every paper about attention cites this.
-* Started the attention boom
-* Simple and effective techinique
 
 ---
 
@@ -229,7 +297,55 @@ Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
 
 .small[.left-column30[
 1. Run RNN over the input:
-<div>$$h_t = \text{RNN}(\text{embed}(x_t, h_{t-1}))$$</div>
+<div>$$h_t = \text{RNN}(\text{embed}(x_t), h_{t-1})$$</div>
+
+2.  Concatenate hidden state vectors into a matrix $H$:
+  $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
+]]
+
+.right-column70[.right[![:scale 99%](img/encoder-decoder 4.5.png)]]
+
+???
+
+Okay, let's have a more formalized look at what we've just discussed.
+We have an input sequence of words, $x_1 ... x_n$. We map this input into
+embedding vectors. Then we we run recurrent neural, producing hidden states
+$h_1 ... h_n$ along the way.
+
+---
+
+## Encoder-decoder, no attention
+
+.small[.left-column30[
+1. Run RNN over the input:
+<div>$$h_t = \text{RNN}(\text{embed}(x_t), h_{t-1})$$</div>
+
+2.  Concatenate hidden state vectors into a matrix $H$:
+  $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
+
+3. Encode input sequence into a vector $c$:
+  $$c = q(H)$$
+
+  For example,
+  $$c = h_n$$
+
+]]
+
+.right-column70[.right[![:scale 99%](img/encoder-decoder 4.png)]]
+
+???
+
+For the *non-attention* case, we then summary the whole source sentence into
+a single vector $\mathbf{c}\$, commonly by just taking the last hidden state
+and discarding all others.
+
+---
+
+## Encoder-decoder, no attention
+
+.small[.left-column30[
+1. Run RNN over the input:
+<div>$$h_t = \text{RNN}(\text{embed}(x_t), h_{t-1})$$</div>
 
 2.  Concatenate hidden state vectors into a matrix $H$:
   $$ H = \left[ \begin{array}{c} h_1 & h_2 & h_3 & ... & h_n \end{array} \right] $$
@@ -241,23 +357,15 @@ Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
   $$c = h_n$$
 
 4. Predict the next output word:
-<div>$$y_t = g(y_{t-1}, s_{t-1}, c)$$</div>
+<div>$$y_t = g(\text{embed}(y_{t-1}), h_{t-1}) $$</div>
+
+<div>$$h_0^{(dest)} = c$$</div>
 
 ]]
 
-.right-column70[.right[![:scale 100%](img/encoder-decoder.png)]]
+.right-column70[.right[![:scale 99%](img/encoder-decoder.png)]]
 
 ???
-
-Okay, let's have a more formalized look at what we've just discussed.
-We have an input sequence of words, $x_1 ... x_n$. We map this input into
-embedding vectors. Then we we run recurrent neural, producing hidden states
-$h_1 ... h_n$ along the way.
-
-For the *non-attention* case, we then summary the whole source sentence into
-a single vector $\mathbf{c}\$, commonly by just taking the last hidden state
-and discarding all others.
-
 We use that context vector to predict output sequence one word a time.
 
 ---
@@ -277,11 +385,11 @@ We use that context vector to predict output sequence one word a time.
 </div>
 
 4. Predict the next output word:
-<div>$$y_t = g(y_{t-1}, s_{t-1}, \color{red}{c_i})$$</div>
+<div>$$y_t = g(\text{embed}(y_{t-1}), h_{t-1}, \color{red}{c_i})$$</div>
 
 ]]
 
-.right-column70[.right[![:scale 100%](img/encoder-decoder.png)]]
+.right-column70[.right[![:scale 99%](img/encoder-decoder-attention-overview 5.png)]]
 
 ???
 
@@ -387,17 +495,17 @@ class: left
 
 1. Compute the decoder's hidden state:
 
-   <div>$$h_t = \text{RNN}([\text{embed}(y_{t-1}); c_{t-1}], h_{t-1})$$</div>
+   <div>$$h_t^{(dest)} = \text{RNN}([\text{embed}(y_{t-1}); c_{t-1}], h_{t-1})$$</div>
 
 --
-2. Calculate an attention score $a_t$:
+2. Calculate an attention score $\mathbf{a}_t$:
 
-   <div>$$a_{t,j} = \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) $$</div>
+   <div>$$\mathbf{a}_{t} = \text{attention\_score}(H^{(src)}, h_t^{(dest)}) $$</div>
 
 --
 3. Normalize that:
 
-    <div>$$\mathbf{\alpha}_t = \text{softmax}(a_t)$$</div>
+    <div>$$\mathbf{\alpha}_t = \text{softmax}(\mathbf{a}_t)$$</div>
 
 ???
 
@@ -478,15 +586,11 @@ This is what we need to get linear combination of the input hidden vectors.
 
 ---
 
-## Recap
+## Ways to compute attention scores
 
-1. What problem attention solves?
+### Dot product:
 
-2. What is a context vector $c_i$?
-
-3. What is attention vector $\alpha_t$?
-
-4. How to compute attention vector?  (that we don't know yet)
+<div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = h_j^{(src)\intercal}  h_t^{(dest)} $$</div>
 
 ???
 
@@ -495,24 +599,6 @@ to achieve. We also saw how it's used to calculate context vectors and how
 we pass those into the decoder RNN. This remaining missing piece is how
 to get the attention score.
 
----
-
-## Ways to compute attention scores
-
-### Dot product:
-
-<div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = h_j^{(src)\intercal}  h_t^{(dest)} $$</div>
-
-.medium[
-Pros:
-  * adds no additional parameters
-  * simple and fast
-
-Cons:
-  * forces input and output hidden vectors to be in the same space
-]
-
-???
 The simplest option is to measure similarity between query and keys by taking
 dot product (скалярний добуток) between two vectors. The advantage of this
 model is that it adds no additional parameters. Disadvantage is that it's not
@@ -523,51 +609,41 @@ order for dot product to be high, vectors must lay close to each other.
 
 ## Ways to compute attention scores
 
-### Bilinear functions:
+### Bilinear function:
 
 <div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = h_j^{(src)\intercal} W_a  h_t^{(dest)} $$</div>
-
-.medium[
-
-Pros:
-  * more flexible
-
-Cons:
-  * adds quite a few parameters
-]
 
 ???
 By performing a linear transform parametrized by $W_a$ we relax the
 restriction that the source and target embeddings msut be in the same
-space. On the other hand, it adds quite a few parameters.
+space. If the $W_a$ is not square, source and destination hidden states can be
+of different sizes, which is good.  On the other hand, it adds quite a few
+parameters.
 
 ---
 
 ## Ways to compute attention scores
 
-### Multi-layer perceptrons:
+### Multi-layer perceptron:
 
 <div>$$ \text{attention\_score}(h_j^{(src)}, h_t^{(dest)}) = w_{a2}^\intercal \tanh(W_{a1} [h_j^{(src)}; h_t^{(dest)}])$$</div>
-
-.medium[
-
-Pros:
-  * flexible
-  * fewer parameters
-
-Cons:
-  * doesn't fit complex structures
-]
-
 
 ???
 Multi-layer perceptron was the method originally employed by Bahdanau.
 This is more flexible that the dot product method, usually has fewer
 parameters of the three, and generally provides good results.
 
+W = (k, k)
+H = (k, L)
+M = tanh(W @ H) = (k, L)
+
+w = (1, k)
+alpha = softmax(w @ M) = (1, L)
+
+
 ---
 
-## Attention scores
+## Ways to compute attention scores
 
 ### Advanced methods
 
@@ -596,6 +672,24 @@ distortion. In experiments, we show our parameterization of attention improves
 translation quality.
 
 ---
+
+## Recap
+
+1. What is the problem attention solves?
+
+2. What is a context vector $c_i$?
+
+3. What is attention vector $\alpha_t$?
+
+4. How to compute attention vector?
+
+---
+class: center, middle
+# Part III: 
+# Advances and applications
+
+---
+
 
 ## Image Caption Generation
 
@@ -644,33 +738,6 @@ methods like reinforcement learning -- much slower to train than with
 backprop.
 
 ---
-
-
-# Gated Attention
-
-## Gated-Attention Readers for Text Comprehension
-
-[Dhingra, 2017]
-
-???
-
-* ICLR 2017 paper.
-* State-of-the-art on cloze-style questions.
-
-
----
-
-## Neural Machine Translation with Recurrent Attention Modeling
-
-
----
-
-# Attention-over-Attention
-
-Introduced in [Cui, Chen, 2016] for cloze-style reading comprehension task.
-
----
-
 # Hierarchical Attention Networks
 
 .right[.medium[*Hierarchical Attention Networks for Document Classification ([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
@@ -710,12 +777,9 @@ Predicting YELP rating:
 
 ---
 
-# Attention networks results
+# Text entailnment task
 
-
----
-
-# Stanford Natural Language Inference Corpus
+### Stanford Natural Language Inference Corpus
 
 **ENTAILMENT**:
   * A man rides a bike on a snow covered road.
@@ -730,3 +794,14 @@ Predicting YELP rating:
 **CONTRADICTION**
   * A man in an apron shopping at a market.
   * A man in an apron is preparing dinner.
+
+
+---
+
+# Tricks and tips
+
+---
+
+class: center, middle
+
+# Thank you!
