@@ -5,7 +5,11 @@ class: center, middle
 
 Oleksiy Syvokon
 
-research engineer @ Grammarly
+Dmitry Unkovsky
+
+Grammarly
+
+![](img/logo.png)
 
 ---
 
@@ -911,36 +915,75 @@ class: large
 
 # Text entailment task
 
-## Examples
+## Some examples
 
 ---
 
-![](./img/entailment-example-0.png)
+![:scale 40%](./img/entailment-example-0.png)
 
 ---
 
-# Text entailment task
-
-![:scale 70%](./img/entailment-example-1.png)
-
----
-
-# Text entailment task
-
-![:scale 70%](./img/entailment-example-2.png)
+![:scale 80%](./img/entailment-example-1.png)
 
 ---
 
 # Text entailment task
 
-![:scale 40%](./img/entailment-example-3.png)
+![:scale 28%](./img/entailment-example-2.png)
+
+---
+# Text entailment task
+
+```
+(438165,
+ [('neutral', 0.059420608440525213),
+  ('contradiction', 0.013449424957027407),
+  ('entailment', 0.9271299666024474)],
+ ('A football player jumps over fallen players to continue his run .',
+  'Football players run .'),
+ 2)
+```
 
 ---
 
 # Text entailment task
 
-![:scale 40%](./img/entailment-example-4.png)
+![:scale 30%](./img/entailment-example-3.png)
 
+---
+
+# Text entailment task
+
+```
+(453432,
+ [('neutral', 0.78306303831501389),
+  ('contradiction', 0.037344639411123676),
+  ('entailment', 0.17959232227386249)],
+ ('Three women in ethnic clothing digging next to a dirt road .',
+  'Three Iraqi women are digging .'),
+ 0)
+```
+
+---
+
+# Text entailment task
+
+![:scale 60%](./img/entailment-example-4.png)
+
+---
+
+# Text entailment task
+
+```
+(47287,
+ [('neutral', 0.9475953085514297),
+  ('contradiction', 0.030916902870005147),
+  ('entailment', 0.021487788578565356)],
+ ('A woman poses awkwardly by a mural .',
+  'A sad woman poses awkwardly by a mural .'),
+ 0)
+```
+ 
 ---
 
 # Text entailment task
@@ -949,14 +992,33 @@ class: large
 
 ---
 
+# Text entailment task
+
+```
+(40097,
+ [('neutral', 0.065135302356665037),
+  ('contradiction', 0.0057766436558386253),
+  ('entailment', 0.92908805398749639)],
+ ('Rock climbers at the top of a large rock .',
+  'The rock climbers are outdoors .'),
+ 2)
+```
+
+---
+class: large
+
 # Tricks and tips
 
 ---
+class: large
 
-class: center, middle
+# Other tricks and tips
 
-# Thank you!
-
+* **Normalize** your attention to 1 not only on columns, but on rows too
+* **Fertility**: penalize overattended inputs, reward underattended
+* **Symmetry**: Back and forth symmetry: F -> E are aligned symmetrical as E -> F
+* ... lots of them! Read 1200-something papers on attention, and suit
+  to your needs :-)
 
 ---
 
@@ -971,3 +1033,22 @@ class: center, middle
 
 3. Hierarchical Attention Networks for Document Classification. 2016.
 ([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
+
+---
+
+class: center, middle
+
+# Thank you!
+
+Oleksiy Syvokon http://github.com/asivokon
+
+Dmitry Unkovsky
+ https://github.com/diunko
+ https://facebook.com/dmitry.unkovsky
+
+Grammarly
+
+![](img/logo.png)
+
+ https://www.facebook.com/AwesomelyG/
+
