@@ -1082,14 +1082,14 @@ Grammarly
    translation by jointly learning to align and translate. *arXiv preprint
    arXiv:1409.0473.*
 
-2. Show, Attend and Tell: Neural Image Caption Generation with Visual Attention. 2016.
+2. Neural Machine Translation and Sequence-to-sequence Models: A Tutorial. 2017.
+   Graham Neubig.
+
+3. Show, Attend and Tell: Neural Image Caption Generation with Visual Attention. 2016.
    Xu et al. 2016. *arXiv:1502.03044.*
 
-3. Hierarchical Attention Networks for Document Classification. 2016.
+4. Hierarchical Attention Networks for Document Classification. 2016.
    Zichao Yang, Diyi Yang, Chris Dyer, Xiaodong He, Alex Smola, Eduard Hovy
-
-4. Neural Machine Translation and Sequence-to-sequence Models: A Tutorial. 2017.
-   Graham Neubig.
 
 5. Effective Approaches to Attention-based Neural Machine Translation. 2015.
    Minh-Thang Luong, Hieu Pham, Christopher D. Manning.
