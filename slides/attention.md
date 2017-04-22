@@ -730,6 +730,13 @@ translation quality.
 
 ---
 
+
+## Google NMT
+
+![:scale 100%](img/google-nmt.png)
+
+---
+
 ## Recap
 
 1. What is the problem attention solves?
