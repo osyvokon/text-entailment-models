@@ -287,6 +287,13 @@ Finally, I get to the last part.
 
 ---
 
+# Attention intuition
+
+![:scale 100%](img/nmt-model-fast.gif)
+
+.right[.small[\* https://google.github.io/seq2seq/]]
+
+---
 
 # Attention intuition: words alignment
 
