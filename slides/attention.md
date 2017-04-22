@@ -234,6 +234,15 @@ details that are important for tasks like translation.
 * Simple and effective techinique
 * Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio.
 
+--
+* ICLR 2015 paper
+
+--
+
+* 1215 citations so far (and counting) -- every paper about attention cites this.
+
+Started the attention boom in NLP!
+
 ---
 class: center, middle
 # Part II: 
@@ -718,9 +727,15 @@ translation quality.
 
 1. What is the problem attention solves?
 
+--
+
 2. What is a context vector $c_i$?
 
+--
+
 3. What is attention vector $\alpha_t$?
+
+--
 
 4. How to compute attention vector?
 
