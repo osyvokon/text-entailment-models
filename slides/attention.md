@@ -92,7 +92,7 @@ class: center, middle
 ???
 
 Can feed variable length sequences as input
-and get artbitrary length seqs on output.
+and get arbitrary length seqs on output.
 
 --
 
@@ -142,28 +142,28 @@ What matters, is that in the end we have a single vector `h_6` that represents
 similar to the familiar word embeddings. For example, sentences that have
 similar meaning will likely have representations that are close to each other.
 
-Having sentence embedding in hand, we can use it for banch of tasks.
+Having sentence embedding in hand, we can use it for bunch of tasks.
 We can feed it into a classifier to get sentence category, like sentiment.
 For a pair of sentences, we can concatenate the two states and again feed that
-to a classifer, for example, to predict entailment relations.
+to a classifier, for example, to predict entailment relations.
 
 For encoder-decoder architectures, we use that embedding to generate an
 output sequence. We have another recurrent network (say, LSTM), that starts
 with its state initialized by $h_6$. From that, it generates a new hidden
 state, $h_7$, and predicts the first token by generating a softmaxed
-distribution over the vocubalary. Let's say, we've picked the $argmax(y_7)$,
+distribution over the vocabulary. Let's say, we've picked the $argmax(y_7)$,
 everything went well and the first word was "кіт" in our case, just as expected.
 
 On the next step, we feed the predicted $y$ and the previous hidden state
-$h_7$ to generate the probabilty distribution for the second word.
+$h_7$ to generate the probability distribution for the second word.
 We continue until we see the end-of-sentence symbol.
 
 That is a general intuition of how neural translation works. In practice,
-of course, it is slighetly more complicated. The architecture has several
+of course, it is slightly more complicated. The architecture has several
 layers. Normally, bi-directional LSTM are used, so that we encode source sentence
 *twice*, the original and the reversed version, and the concatenate the two
 state vectors. On the decoder stage, it is common to do a beam search
-(with a relatevily small beam size of 3 to 15) instead of a greedy search
+(with a relatively small beam size of 3 to 15) instead of a greedy search
 that I've described. However, even the simple architecture will be able
 to give more-or-less meaningful results.
 
@@ -209,7 +209,7 @@ State bottleneck:
 The idea of representing the whole sentence meaning in a single fixed-sized
 vector is very appealing, but it also means that the decoder must start
 having only a fixed-sized vector at hand. Unfortunately, it doesn't work that
-well with long sentences. Intuitevely, when we try to cramp the long and/or
+well with long sentences. Intuitively, when we try to cramp the long and/or
 complicated sentence into a fixed-sized vector, we will inevitably loose
 details that are important for tasks like translation.
 
@@ -246,7 +246,7 @@ class: center, middle
 
 ???
 
-What we humans do when translating, is regularaly look onto the source sentence
+What we humans do when translating, is regularly look onto the source sentence
 a couple words a time. We don't just read the source sentence once and then
 throw it away. We keep it around and concentrate on relevant parts of it when
 needed. That is the basic idea behind the attention mechanism: let's keep the
@@ -263,7 +263,7 @@ For example, when at the start of the sentence, I will look at the word "cat".
 ???
 
 Then I move to the next word, and only interested in the second word (and maybe
-also in some surroinding context as well as in the general context of what this
+also in some surrounding context as well as in the general context of what this
 sentence is all about).
 
 ---
