@@ -13,7 +13,7 @@ Grammarly
 
 ---
 
-# Why bother?
+# Why?
 
 .right[
 >>> I am very excited by the recently introduced
@@ -834,7 +834,7 @@ Given two sentences, the first called **premise**, and the second called
 ---
 class: large
 
-# Text entailnment task
+# Text entailment task
 
 Given two sentences, first called **premise**, and the second called
 **hypothesis**, classify their relation either as an **entailment**,
@@ -1015,10 +1015,35 @@ class: large
 # Other tricks and tips
 
 * **Normalize** your attention to 1 not only on columns, but on rows too
+
 * **Fertility**: penalize overattended inputs, reward underattended
+
 * **Symmetry**: Back and forth symmetry: F -> E are aligned symmetrical as E -> F
+
 * ... lots of them! Read 1200-something papers on attention, and suit
   to your needs :-)
+
+
+---
+class: center, middle
+
+# Thank you!
+
+Oleksiy Syvokon
+
+.small[http://github.com/asivokon]
+
+Dmitry Unkovsky
+.small[
+ https://github.com/diunko
+ https://facebook.com/dmitry.unkovsky
+ ]
+
+Grammarly
+
+![](img/logo.png)
+
+ https://www.facebook.com/AwesomelyG/
 
 ---
 
@@ -1029,26 +1054,16 @@ class: large
    arXiv:1409.0473.*
 
 2. Show, Attend and Tell: Neural Image Caption Generation with Visual Attention. 2016.
-   Xu et al. 2016. arXiv:1502.03044.*
+   Xu et al. 2016. *arXiv:1502.03044.*
 
 3. Hierarchical Attention Networks for Document Classification. 2016.
-([Yang, 2016](https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf)) *]]
+   Zichao Yang, Diyi Yang, Chris Dyer, Xiaodong He, Alex Smola, Eduard Hovy
 
----
+4. Neural Machine Translation and Sequence-to-sequence Models: A Tutorial. 2017.
+   Graham Neubig.
 
-class: center, middle
+5. Effective Approaches to Attention-based Neural Machine Translation. 2015.
+   Minh-Thang Luong, Hieu Pham, Christopher D. Manning.
 
-# Thank you!
-
-Oleksiy Syvokon http://github.com/asivokon
-
-Dmitry Unkovsky
- https://github.com/diunko
- https://facebook.com/dmitry.unkovsky
-
-Grammarly
-
-![](img/logo.png)
-
- https://www.facebook.com/AwesomelyG/
-
+6. Sequence to Sequence Learning with Neural Networks. 2014.
+   Ilya Sutskever, Oriol Vinyals, Quoc V. Le
