@@ -812,26 +812,140 @@ Predicting YELP rating:
 
 ![:scale 60%](./img/hierarchical-yelp.png)
 
+
 ---
+class: large
+
+# Text entailment task
+
+---
+class: large
+
+# Text entailment task
+
+Given two sentences, the first called **premise**, and the second called
+**hypothesis**, classify their relation either as an **entailment**,
+**neutral**, or a **contradiction** 
+
+---
+class: large
 
 # Text entailnment task
 
-### Stanford Natural Language Inference Corpus
+Given two sentences, first called **premise**, and the second called
+**hypothesis**, classify their relation either as an **entailment**,
+**neutral**, or a **contradiction** 
 
-**ENTAILMENT**:
+Examples:
+
   * A man rides a bike on a snow covered road.
   * A man is outside.
 
+or:
 
-**NEUTRAL**:
   * 2 female babies eating chips.
   * Two female babies are enjoying chips.
 
+or:
 
-**CONTRADICTION**
   * A man in an apron shopping at a market.
   * A man in an apron is preparing dinner.
 
+---
+class: large
+
+# Text entailment task
+
+What would be your model to tell a proper class?
+
+---
+class: large
+
+# Text entailment task
+
+### Data: Stanford Natural Language Inference Corpus
+
+https://nlp.stanford.edu/projects/snli/
+
+~ 500k annotated sentence pairs
+
+---
+
+# Text entailment task
+
+## Reminds of kaggle Quora Question Pairs task
+
+Can you identify question pairs that have the same intent?
+
+https://www.kaggle.com/c/quora-question-pairs/data
+
+Examples:
+
+ * What are the top 10 books one should read in his or her early 20s?
+ * What books are worth reading in early 20s?
+
+or
+
+ * How do I read and find my YouTube comments?
+ * How can I see all my Youtube comments?
+
+or
+
+ * Does society place too much importance on sports?
+ * How do sports contribute to the society?
+
+---
+class: large
+
+# Text entailment task
+
+## Architecture
+
+---
+
+# Text entailment task
+
+![:scale 70%](./img/entailment.png)
+
+---
+
+# Text entailment task
+
+## Examples
+
+---
+
+![](./img/entailment-example-0.png)
+
+---
+
+# Text entailment task
+
+![:scale 70%](./img/entailment-example-1.png)
+
+---
+
+# Text entailment task
+
+![:scale 70%](./img/entailment-example-2.png)
+
+---
+
+# Text entailment task
+
+![:scale 40%](./img/entailment-example-3.png)
+
+---
+
+# Text entailment task
+
+![:scale 40%](./img/entailment-example-4.png)
+
+---
+
+# Text entailment task
+
+![:scale 40%](./img/entailment-example-5.png)
 
 ---
 
