@@ -1052,6 +1052,9 @@ class: large
 * ... lots of them! Read 1200-something papers on attention, and suit
   to your needs :-)
 
+* at least, read [Incorporating Structural Alignment Biases into an Attentional Neural
+Translation Model](http://aclweb.org/anthology/N/N16/N16-1102.pdf)
+
 
 ---
 class: center, middle
